@@ -77,25 +77,35 @@ const point6_3 = new THREE.Mesh(circle, pointMaterial);
 const point6_4 = new THREE.Mesh(circle, pointMaterial);
 const point6_5 = new THREE.Mesh(circle, pointMaterial);
 const point6_6 = new THREE.Mesh(circle, pointMaterial);
-
 point6_1.position.set(-0.2, -0.2, 0);
 point6_2.position.set(-0.2, 0, 0);
 point6_3.position.set(-0.2, 0.2, 0);
 point6_4.position.set(0.2, -0.2, 0);
 point6_5.position.set(0.2, 0, 0);
 point6_6.position.set(0.2, 0.2, 0);
-
 const point6 = new THREE.Group();
 
 point6.add(point6_1, point6_2, point6_3, point6_4, point6_5, point6_6);
 point6.position.z = -0.5;
 
-const helper = new THREE.GridHelper(5, 5);
+const planeGeometry = new THREE.PlaneGeometry(4, 4);
+const groundMaterial = new THREE.MeshBasicMaterial({
+  color: 0xffff00,
+  side: THREE.DoubleSide,
+});
+const ground = new THREE.Mesh(planeGeometry, groundMaterial);
+ground.rotation.x = Math.PI * 0.5;
+
+const debugUi = new THREE.Group();
+const axesHelper = new THREE.AxesHelper(2);
+const helper = new THREE.GridHelper(6, 6);
+debugUi.add(helper, axesHelper);
 
 const dice = new THREE.Group();
-dice.add(container, point1, point2, point3, point4, point5, point6, helper);
+dice.position.y = 0.55;
+dice.add(container, point1, point2, point3, point4, point5, point6);
 
-scene.add(dice);
+scene.add(dice, debugUi, ground);
 
 gui.add(point2.position, 'x').min(-3).max(3).step(0.1);
 gui.add(point2.rotation, 'y').min(-3).max(3).step(0.1);
@@ -104,20 +114,15 @@ const camera = new THREE.PerspectiveCamera(75, size.width / size.height);
 camera.position.z = 4;
 scene.add(camera);
 
-const axesHelper = new THREE.AxesHelper(2);
-scene.add(axesHelper);
-
 const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize(size.width, size.height);
 //renderer.render(scene, camera);
 
 const clock = new THREE.Clock();
-
 const controls = new OrbitControls(camera, renderer.domElement);
 
 function gameLoop() {
   //dice.rotation.y = clock.getElapsedTime();
-
   //point2.position.x = Math.cos(clock.getElapsedTime());
 
   renderer.render(scene, camera);
