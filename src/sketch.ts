@@ -4,6 +4,41 @@ import GUI from 'lil-gui';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Color } from 'three';
 
+const imgSource = 'Fabric_Lace_019_basecolor.jpg';
+const imgSourceHeight = 'Fabric_Lace_019_height.jpg';
+const imgSourceAmbientOcclusion = 'Fabric_Lace_019_ambientOcclusion.jpg';
+const imgSourceOpacity = 'Fabric_Lace_019_opacity.jpg';
+
+const image = new Image();
+const imageHeight = new Image();
+const imageAmbientOcclusion = new Image();
+const imageOpacity = new Image();
+
+const texture = new THREE.Texture(image);
+const textureHeight = new THREE.Texture(imageHeight);
+const textureAmbientOcclusion = new THREE.Texture(imageAmbientOcclusion);
+const textureOpacity = new THREE.Texture(imageOpacity);
+
+image.addEventListener('load', () => {
+  texture.needsUpdate = true;
+});
+
+imageHeight.addEventListener('load', () => {
+  textureHeight.needsUpdate = true;
+});
+imageAmbientOcclusion.addEventListener('load', () => {
+  textureAmbientOcclusion.needsUpdate = true;
+});
+
+imageOpacity.addEventListener('load', () => {
+  textureOpacity.needsUpdate = true;
+});
+
+image.src = imgSource;
+imageHeight.src = imgSourceHeight;
+imageAmbientOcclusion.src = imgSourceAmbientOcclusion;
+imageOpacity.src = imgSourceOpacity;
+
 //gray = 0xb0b0b0
 //const color_black = 'black';
 
@@ -17,13 +52,24 @@ const size = {
 //*SCENE
 let canvas: HTMLCanvasElement = document.querySelector('.webgl')!;
 
-const box = new THREE.BoxGeometry(1, 1, 1);
+const box = new THREE.BoxGeometry(1, 1, 1, 10, 10);
 const circle = new THREE.SphereGeometry(0.05, 32);
 
-const boxMaterial = new THREE.MeshStandardMaterial({ color: 0xe71837 });
+const boxMaterial = new THREE.MeshStandardMaterial({
+  map: texture,
+  displacementMap: textureHeight,
+  aoMap: textureAmbientOcclusion,
+  displacementScale: 10,
+});
+
 const pointMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
 
 const container = new THREE.Mesh(box, boxMaterial);
+container.geometry.setAttribute(
+  'uv2',
+  new THREE.Float32BufferAttribute(container.geometry.attributes.uv.array, 2)
+);
+
 const point1 = new THREE.Mesh(circle, pointMaterial);
 point1.position.z = 0.5;
 
@@ -110,7 +156,7 @@ dice2.rotation.y = 0.4;
 gui.add(point2.position, 'x').min(-3).max(3).step(0.1);
 gui.add(point2.rotation, 'y').min(-3).max(3).step(0.1);
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
 const pointLight = new THREE.PointLight(0xff9000, 0.5);
 pointLight.position.set(0, 0.2, 0.2);
 
